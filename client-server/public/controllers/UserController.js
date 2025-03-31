@@ -189,7 +189,7 @@ class UserController {
             return false;
 
 
-        }
+        } 
         
         return new User(
             user.name,
@@ -208,6 +208,21 @@ class UserController {
     selectAll(){
 
         //let users = User.getUsersStorage();
+
+        HttpRequest.get('/users').then(data => {
+
+            data.users.forEach(dataUser=>{
+
+                let user = new User();
+   
+                user.loadFromJSON(dataUser);
+   
+               this.addLine(user);
+   
+           
+           });
+
+        });
 
         let ajax = new XMLHttpRequest();
 
