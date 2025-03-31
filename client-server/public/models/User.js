@@ -79,7 +79,7 @@ loadFromJSON(json){
             this[name] = new Date (json[name]);
             break;
             default:
-                this[name] = json[name];
+                if (name.substring(0, 1) === '_') this[name] = json[name];
 
         }
 
@@ -114,35 +114,49 @@ getNewID(){
 
 }
 
+toJSON(){
+
+    let json = {};
+
+    Object.keys(this).forEach(key => {
+
+       if (this[key] !== undefined) json[key] = this[key];
+
+    });
+
+    return json;
+
+}
+
 save(){
 
-    let users = User.getUsersStorage();
+    return new Promise((resolve, reject)=>{
 
-    if (this.id > 0) {
+        let promise;
 
-        users.map(u=>{
+   if (this.id){
 
-            if (u._id == this.id) {
+    promise = HttpRequest.put(`/users/${this.id}`, this.toJSON());
 
-                Object.assign(u, this);
+   } else {
 
-            }
+    promise = HttpRequest.post(`/users`, this.toJSON());
 
-            return u;
+   }
 
-        })
+   promise.then(data => {
 
-       
+    this.loadFromJSON(data);
 
-    } else {
+    resolve(this);
 
-        this._id = this.getNewID();
+   }).catch(e=>{
 
-        users.push(this);
+    reject(e);
 
-    }
+   });
 
-    localStorage.setItem("users", JSON.stringify(users));
+    });
 
 }
 
@@ -165,7 +179,5 @@ remove(){
 
 
 }
-
-
 
 }
